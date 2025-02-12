@@ -55,6 +55,10 @@ const extractTextFromDocx = async (fileBuffer) => {
   }
 };
 
+app.get("/",async(req,res)=>{
+    res.send("hi")
+})
+
 // File upload route
 app.post("/api/resumetext", upload.single("resume"), fileValidator, async (req, res) => {
   try {
