@@ -27,7 +27,11 @@ const fileValidator = (req, res, next) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
   if (!allowedMimeTypes.includes(req.file.mimetype)) {
-    return res.status(400).json({ error: "Unsupported file format. Only PDF and DOCX are allowed." });
+    return res
+      .status(400)
+      .json({
+        error: "Unsupported file format. Only PDF and DOCX are allowed.",
+      });
   }
 
   next();
@@ -55,31 +59,36 @@ const extractTextFromDocx = async (fileBuffer) => {
   }
 };
 
-app.get("/",async(req,res)=>{
-    res.send("hi")
-})
-
-// File upload route
-app.post("/api/resumetext", upload.single("resume"), fileValidator, async (req, res) => {
-  try {
-    let extractedText;
-
-    if (req.file.mimetype === "application/pdf") {
-      extractedText = await extractTextFromPDF(req.file.buffer);
-    } else if (
-      req.file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
-      req.file.mimetype === "application/msword"
-    ) {
-      extractedText = await extractTextFromDocx(req.file.buffer);
-    } else {
-      return res.status(400).json({ error: "Unsupported file type." });
-    }
-
-    res.status(200).json({ text: extractedText });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+app.get("/", (req, res) => {
+  res.send("Hello From Server");
 });
+// File upload route
+app.post(
+  "/api/resumetext",
+  upload.single("resume"),
+  fileValidator,
+  async (req, res) => {
+    try {
+      let extractedText;
+
+      if (req.file.mimetype === "application/pdf") {
+        extractedText = await extractTextFromPDF(req.file.buffer);
+      } else if (
+        req.file.mimetype ===
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ||
+        req.file.mimetype === "application/msword"
+      ) {
+        extractedText = await extractTextFromDocx(req.file.buffer);
+      } else {
+        return res.status(400).json({ error: "Unsupported file type." });
+      }
+
+      res.status(200).json({ text: extractedText });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+);
 
 // Start server with environment variable port
 app.listen(PORT, () => {
